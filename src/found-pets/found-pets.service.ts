@@ -1,6 +1,7 @@
 ﻿import { Inject, Injectable } from '@nestjs/common';
-import { CACHE_MANAGER, Cache } from '@nestjs/cache-manager';
-import { InjectRepository } from '@nestjs/typeorm';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { getRepositoryToken } from '@nestjs/typeorm';
+import type { Cache } from 'cache-manager';
 import type { Point } from 'geojson';
 import { Repository } from 'typeorm';
 import { CACHE_KEY_FOUND_PETS_LIST } from '../common/cache-keys';
@@ -13,9 +14,9 @@ import { LostPet } from '../lost-pets/lost-pet.entity';
 @Injectable()
 export class FoundPetsService {
   constructor(
-    @InjectRepository(FoundPet)
+    @Inject(getRepositoryToken(FoundPet))
     private readonly foundPetRepository: Repository<FoundPet>,
-    @InjectRepository(LostPet)
+    @Inject(getRepositoryToken(LostPet))
     private readonly lostPetRepository: Repository<LostPet>,
     @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
     private readonly mailService: MailService,

@@ -11,6 +11,10 @@ import { FoundPetsModule } from './found-pets/found-pets.module';
 import { LostPetsModule } from './lost-pets/lost-pets.module';
 
 function buildRedisUrl(): string {
+  if (envs.REDIS_URL) {
+    return envs.REDIS_URL;
+  }
+
   const pwd = envs.REDIS_PASSWORD;
   if (pwd) {
     return `redis://:${encodeURIComponent(pwd)}@${envs.REDIS_HOST}:${envs.REDIS_PORT}`;
@@ -38,6 +42,7 @@ function buildRedisUrl(): string {
       username: envs.DB_USER,
       password: envs.DB_PASSWORD,
       database: envs.DB_NAME,
+      ssl: envs.DB_SSL ? { rejectUnauthorized: false } : false,
       autoLoadEntities: true,
       synchronize: process.env.NODE_ENV !== 'production',
     }),

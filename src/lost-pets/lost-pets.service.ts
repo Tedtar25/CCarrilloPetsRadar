@@ -1,16 +1,20 @@
-﻿import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
+﻿import { Inject, Injectable } from '@nestjs/common';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { getRepositoryToken } from '@nestjs/typeorm';
+import type { Cache } from 'cache-manager';
 import type { Point } from 'geojson';
 import { Repository } from 'typeorm';
 import { LostPet } from './lost-pet.entity';
 import { pointToLatLng } from '../common/geo.utils';
 import { CreateLostPetDto } from './dto/create-lost-pet.dto';
+import { CACHE_KEY_LOST_PETS_ACTIVE } from '../common/cache-keys';
 
 @Injectable()
 export class LostPetsService {
   constructor(
-    @InjectRepository(LostPet)
+    @Inject(getRepositoryToken(LostPet))
     private readonly lostPetRepository: Repository<LostPet>,
+    @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
   ) {}
 
   async findAllActive(): Promise<
@@ -49,6 +53,7 @@ export class LostPetsService {
     });
 
     await this.lostPetRepository.save(entity);
+    await this.cacheManager.del(CACHE_KEY_LOST_PETS_ACTIVE);
 
     return {
       id: entity.id,

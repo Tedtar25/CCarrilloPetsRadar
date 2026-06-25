@@ -1,4 +1,4 @@
-import { useAzureMonitor } from 'applicationinsights';
+import * as appInsights from 'applicationinsights';
 import { envs } from '../config/envs';
 
 export function setupApplicationInsights(): void {
@@ -6,9 +6,5 @@ export function setupApplicationInsights(): void {
   if (!cs?.trim()) {
     return;
   }
-  useAzureMonitor({
-    azureMonitorExporterOptions: {
-      connectionString: cs,
-    },
-  });
+  appInsights.setup(cs).start();
 }

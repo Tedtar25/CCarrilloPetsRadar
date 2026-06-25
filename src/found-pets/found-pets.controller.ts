@@ -1,15 +1,5 @@
-import {
-  Body,
-  Controller,
-  Get,
-  Post,
-  UseInterceptors,
-} from '@nestjs/common';
-import {
-  CacheInterceptor,
-  CacheKey,
-  CacheTTL,
-} from '@nestjs/cache-manager';
+import { Body, Controller, Get, Post, UseInterceptors } from '@nestjs/common';
+import { CacheInterceptor, CacheKey, CacheTTL } from '@nestjs/cache-manager';
 import { CACHE_KEY_FOUND_PETS_LIST } from '../common/cache-keys';
 import { CreateFoundPetDto } from './dto/create-found-pet.dto';
 import { FoundPetsService } from './found-pets.service';

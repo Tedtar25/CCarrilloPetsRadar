@@ -1,18 +1,30 @@
 ﻿import { Injectable, Logger } from '@nestjs/common';
 import * as nodemailer from 'nodemailer';
+import type { Transporter } from 'nodemailer';
 import { envs } from '../config/envs';
 
 @Injectable()
 export class MailService {
   private readonly logger = new Logger(MailService.name);
 
-  private readonly transporter = nodemailer.createTransport({
-    service: envs.MAILER_SERVICE,
-    auth: {
-      user: envs.MAILER_EMAIL,
-      pass: envs.MAILER_PASSWORD,
-    },
-  });
+  private readonly transporter: Transporter | null = this.createTransporter();
+
+  private createTransporter(): Transporter | null {
+    if (!envs.MAILER_EMAIL || !envs.MAILER_PASSWORD || !envs.MAILER_SERVICE) {
+      this.logger.warn(
+        'Correo deshabilitado: configura MAILER_EMAIL, MAILER_PASSWORD y MAILER_SERVICE para enviar notificaciones',
+      );
+      return null;
+    }
+
+    return nodemailer.createTransport({
+      service: envs.MAILER_SERVICE,
+      auth: {
+        user: envs.MAILER_EMAIL,
+        pass: envs.MAILER_PASSWORD,
+      },
+    });
+  }
 
   async sendNearbyLostPetsEmail(params: {
     foundPetId: string;
@@ -26,6 +38,13 @@ export class MailService {
       longitude: number;
     }>;
   }) {
+    if (!this.transporter || !envs.MAILER_EMAIL) {
+      this.logger.warn(
+        'Notificación omitida porque el correo no está configurado',
+      );
+      return false;
+    }
+
     const lostPetsHtml = params.nearbyLostPets
       .map(
         (pet) => `
@@ -65,8 +84,10 @@ export class MailService {
       });
 
       this.logger.log('Correo de coincidencia enviado correctamente');
+      return true;
     } catch (error) {
       this.logger.error('Error enviando correo de coincidencia', error);
+      return false;
     }
   }
 }

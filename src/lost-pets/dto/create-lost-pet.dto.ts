@@ -1,12 +1,12 @@
-﻿import { IsNumber, IsString } from 'class-validator';
+﻿import { IsLatitude, IsLongitude, IsString } from 'class-validator';
 
 export class CreateLostPetDto {
   @IsString()
   name: string;
 
-  @IsNumber()
+  @IsLatitude()
   latitude: number;
 
-  @IsNumber()
+  @IsLongitude()
   longitude: number;
 }

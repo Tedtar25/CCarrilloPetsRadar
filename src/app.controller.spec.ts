@@ -15,8 +15,15 @@ describe('AppController', () => {
   });
 
   describe('root', () => {
-    it('should return "Hello World!"', () => {
-      expect(appController.getHello()).toBe('Hello World!');
+    it('should return "PetRadar API"', () => {
+      expect(appController.getHello()).toBe('PetRadar API');
+    });
+
+    it('should return health status', () => {
+      expect(appController.getHealth()).toMatchObject({
+        status: 'ok',
+        service: 'pet-radar-api',
+      });
     });
   });
 });

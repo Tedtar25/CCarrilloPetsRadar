@@ -1,98 +1,206 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# PetRadar API
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+API desarrollada con NestJS para registrar mascotas perdidas y mascotas vistas/encontradas. La aplicación guarda coordenadas en PostgreSQL/PostGIS y puede enviar una notificación por correo cuando una mascota vista está cerca de una mascota perdida activa.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## Tecnologías
 
-## Description
+- NestJS
+- PostgreSQL con PostGIS
+- TypeORM
+- Redis para caché
+- Nodemailer para notificaciones opcionales
+- Docker
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+## Endpoints Principales
 
-## Project setup
+### Salud de la API
 
-```bash
-$ npm install
+```http
+GET /health
 ```
 
-## Compile and run the project
+Respuesta esperada:
 
-```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+```json
+{
+  "status": "ok",
+  "service": "pet-radar-api",
+  "timestamp": "2026-06-24T00:00:00.000Z"
+}
 ```
 
-## Run tests
+### Listar mascotas perdidas activas
 
-```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+```http
+GET /lost-pets
 ```
 
-## Deployment
+### Registrar mascota perdida
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
-
-```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+```http
+POST /lost-pets
+Content-Type: application/json
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+```json
+{
+  "name": "Max",
+  "latitude": 21.123,
+  "longitude": -101.684
+}
+```
 
-## Resources
+### Listar mascotas vistas/encontradas
 
-Check out a few resources that may come in handy when working with NestJS:
+```http
+GET /found-pets
+```
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+### Registrar mascota vista/encontrada
 
-## Support
+```http
+POST /found-pets
+Content-Type: application/json
+```
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+```json
+{
+  "latitude": 21.1231,
+  "longitude": -101.6841,
+  "notes": "Mascota vista cerca del parque"
+}
+```
 
-## Stay in touch
+Si la ubicación está cerca de una mascota perdida activa, la API devuelve las posibles coincidencias y, si el correo está configurado, envía una notificación.
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+## Variables De Entorno
 
-## License
+Variables obligatorias para base de datos:
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+```env
+PORT=3000
+DB_HOST=tu-host-postgres
+DB_PORT=5432
+DB_USER=tu-usuario
+DB_PASSWORD=tu-password
+DB_NAME=tu-base
+DB_SSL=true
+```
+
+Redis puede configurarse con URL completa, recomendado para Upstash:
+
+```env
+REDIS_URL=rediss://default:password@host:6379
+```
+
+O con host, puerto y password:
+
+```env
+REDIS_HOST=tu-host-redis
+REDIS_PORT=6379
+REDIS_PASSWORD=tu-password
+```
+
+Correo opcional:
+
+```env
+MAILER_EMAIL=correo@gmail.com
+MAILER_PASSWORD=password-o-app-password
+MAILER_SERVICE=gmail
+```
+
+Mapbox es opcional en esta versión:
+
+```env
+MAPBOX_TOKEN=token
+```
+
+## Desarrollo Local
+
+Instalar dependencias:
+
+```bash
+npm install
+```
+
+Levantar servicios locales con Docker:
+
+```bash
+docker compose up --build
+```
+
+Ejecutar en modo desarrollo:
+
+```bash
+npm run start:dev
+```
+
+## Despliegue Recomendado
+
+Para la entrega del curso se puede usar:
+
+- API en Render
+- Base de datos PostgreSQL en Supabase
+- Redis en Upstash
+
+### Supabase
+
+Crear un proyecto PostgreSQL y activar PostGIS desde el SQL editor:
+
+```sql
+create extension if not exists postgis;
+```
+
+Copiar los datos de conexión y configurar en Render las variables `DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASSWORD`, `DB_NAME` y `DB_SSL=true`.
+
+### Upstash
+
+Crear una base Redis y copiar la conexión `REDIS_URL`. Usar la URL con protocolo `rediss://`.
+
+### Render
+
+Crear un Web Service conectado al repositorio de GitHub.
+
+Build command:
+
+```bash
+npm install && npm run build
+```
+
+Start command:
+
+```bash
+npm run start:prod
+```
+
+Agregar las variables de entorno de Supabase, Upstash y, si se desea, correo.
+
+## Verificación Para Entrega
+
+Una vez desplegada la API, probar:
+
+```http
+GET https://tu-api.onrender.com/health
+```
+
+Después registrar un dato real:
+
+```http
+POST https://tu-api.onrender.com/lost-pets
+```
+
+Y comprobar que viene desde la base de datos en línea:
+
+```http
+GET https://tu-api.onrender.com/lost-pets
+```
+
+Este último endpoint sirve como endpoint público de lectura para el entregable.
+
+## Scripts
+
+```bash
+npm run build
+npm run start:prod
+npm run test
+```
